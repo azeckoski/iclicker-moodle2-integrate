@@ -307,7 +307,12 @@ class iclicker_service {
 
     // USERS
 
-    const USER_FIELDS = 'id,username,firstname,lastname,email';
+    /**
+     * Fields to query from the user table.
+     *
+     * @var string
+     */
+    static $userfields = '';
 
     /**
      * Authenticate a user by username and password
@@ -382,7 +387,7 @@ class iclicker_service {
         global $DB;
         $user = false;
         if ($username) {
-            $fields = self::USER_FIELDS;
+            $fields = self::get_user_fields();
             if ($allFields) {
                 $fields = '*';
             }
@@ -419,6 +424,12 @@ class iclicker_service {
                     $user->lastname = 'One';
                     $user->email = 'uno_inst@fail.com';
                 }
+                if (!empty($user)) {
+                    $user->firstnamephonetic = '';
+                    $user->lastnamephonetic = '';
+                    $user->middlename = '';
+                    $user->alternatename = '';
+                }
             }
         }
         return $user;
@@ -433,12 +444,14 @@ class iclicker_service {
         global $DB;
         $results = array(
         );
+
+        $userfields = self::get_user_fields();
         if (isset($user_ids)) {
             if (is_array($user_ids)) {
                 $users = false;
                 if (! empty($user_ids)) {
                     //$ids = implode(',', $user_ids);
-                    $users = $DB->get_records_list('user', 'id', $user_ids, 'id', self::USER_FIELDS);
+                    $users = $DB->get_records_list('user', 'id', $user_ids, 'id', $userfields);
                 }
                 if ($users) {
                     foreach ($users as $user) {
@@ -448,9 +461,9 @@ class iclicker_service {
                 }
             } else {
                 // single user id
-                $user = $DB->get_record('user', array('id' => $user_ids), self::USER_FIELDS);
+                $user = $DB->get_record('user', array('id' => $user_ids), $userfields);
                 // TESTING handling
-                if (self::$test_mode && !$user) {
+                if (self::$test_mode && !$user) {                    
                     if ($user_ids == 101) {
                         $user = new stdClass();
                         $user->id = 101;
@@ -480,6 +493,12 @@ class iclicker_service {
                         $user->lastname = 'One';
                         $user->email = 'uno_inst@fail.com';
                     }
+                    if (!empty($user)) {
+                        $user->firstnamephonetic = '';
+                        $user->lastnamephonetic = '';
+                        $user->middlename = '';
+                        $user->alternatename = '';
+                    }
                 }
                 if ($user) {
                     self::makeUserDisplayName($user);
@@ -506,6 +525,23 @@ class iclicker_service {
             }
         }
         return $name;
+    }
+
+    /**
+     * Returns fields used when querying users.
+     *
+     * @return string
+     */
+    private static function get_user_fields() {
+        if (empty(self::$userfields)) {
+            // If we are on Moodle 2.6+ we need to support additional name fields.
+            if (function_exists('get_all_user_name_fields')) {
+                self::$userfields .= 'id,username,email,' . get_all_user_name_fields(true);
+            } else {
+                self::$userfields = 'id,username,firstname,lastname,email';
+            }
+        }
+        return self::$userfields;
     }
 
     private static function makeUserDisplayName(&$user) {
