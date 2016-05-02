@@ -573,8 +573,7 @@ class iclicker_service {
             } else {
                 $accessinfo = get_user_access_sitewide($user_id);
             }
-            /** @noinspection PhpDeprecationInspection */
-            $results = get_user_courses_bycap($user_id, 'moodle/course:update', $accessinfo, false, 'c.sortorder', array(), 1);
+            $results = enrol_get_users_courses($user_id, true, array(), 'c.sortorder');
             $result = count($results) > 0;
         }
         return $result;
@@ -1400,9 +1399,7 @@ class iclicker_service {
             } else {
                 $accessinfo = get_user_access_sitewide($user_id);
             }
-            /** @noinspection PhpDeprecationInspection */
-            $results = get_user_courses_bycap($user_id, 'moodle/course:update', $accessinfo, false,
-                'c.sortorder', array('fullname','summary','timecreated','visible'), self::$max_courses_to_fetch);
+            $results = enrol_get_users_courses($user_id, true, array('fullname','summary','timecreated','visible'), 'c.sortorder');
         }
         if (!$results) {
             $results = array();
