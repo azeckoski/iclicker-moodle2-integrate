@@ -127,8 +127,8 @@ class ClickerWebservicesException extends Exception {
 class iclicker_service {
 
     // CONSTANTS
-    const VERSION = '1.8.3'; // MUST match version.php
-    const BLOCK_VERSION = 2015070400; // MUST match version.php
+    const VERSION = '2.0'; // MUST match version.php
+    const BLOCK_VERSION = 2016050200; // MUST match version.php
 
     // Moodle version - 2.0 = 2010112400; 2.1 = 2011070100; 2.2 = 2011120100; 2.3 = 2012062500; 2.4 = 2012120300
 
@@ -573,8 +573,7 @@ class iclicker_service {
             } else {
                 $accessinfo = get_user_access_sitewide($user_id);
             }
-            /** @noinspection PhpDeprecationInspection */
-            $results = get_user_courses_bycap($user_id, 'moodle/course:update', $accessinfo, false, 'c.sortorder', array(), 1);
+            $results = enrol_get_users_courses($user_id, true, array(), 'c.sortorder');
             $result = count($results) > 0;
         }
         return $result;
@@ -1400,9 +1399,7 @@ class iclicker_service {
             } else {
                 $accessinfo = get_user_access_sitewide($user_id);
             }
-            /** @noinspection PhpDeprecationInspection */
-            $results = get_user_courses_bycap($user_id, 'moodle/course:update', $accessinfo, false,
-                'c.sortorder', array('fullname','summary','timecreated','visible'), self::$max_courses_to_fetch);
+            $results = enrol_get_users_courses($user_id, true, array('fullname','summary','timecreated','visible'), 'c.sortorder');
         }
         if (!$results) {
             $results = array();
